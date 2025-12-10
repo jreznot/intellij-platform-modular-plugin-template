@@ -1,25 +1,30 @@
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-
-version = "1.0"
 plugins {
-    id("intellij-platform-remdev")
-    alias(libs.plugins.compose.compiler)
+    id("rpc")
+    id("org.jetbrains.kotlin.jvm")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.plugin.compose")
 }
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaUltimate, libs.versions.ij.platform) {
-            useInstaller = false
-        }
+        intellijIdea(libs.versions.intellij.platform)
+        bundledModule("intellij.platform.frontend")
         pluginModule(implementation(project(":shared")))
-        bundledModules(
-            "intellij.platform.frontend",
-            "intellij.libraries.skiko",
-            "intellij.libraries.compose.foundation.desktop",
-            "intellij.libraries.compose.runtime.desktop",
-            "intellij.platform.jewel.foundation",
-            "intellij.platform.jewel.ui",
-            "intellij.platform.jewel.ideLafBridge",
-        )
+
+        compileOnly(libs.kotlin.serialization.core.jvm)
+        compileOnly(libs.kotlin.serialization.json.jvm)
+
+        composeUI()
+    }
+}
+
+kotlin {
+    jvmToolchain(21)
+}
+
+tasks {
+    withType<JavaCompile> {
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
     }
 }

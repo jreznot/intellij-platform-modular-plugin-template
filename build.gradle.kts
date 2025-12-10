@@ -2,18 +2,38 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 
+group = "org.jetbrains.plugins.template"
+version = "1.0"
+
 plugins {
-    id("intellij-platform-main")
+    application
+    id("java")
+    alias(libs.plugins.intellij.platform)
+
+    alias(libs.plugins.rpc) apply false
+    alias(libs.plugins.kotlin) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }
 
-group = "com.example"
-version = "1.0"
+subprojects {
+    apply(plugin = "org.jetbrains.intellij.platform.module")
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        intellijPlatform {
+            defaultRepositories()
+        }
+        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies/")
+    }
+}
 
 dependencies {
     intellijPlatform {
-        create(IntelliJPlatformType.IntellijIdeaUltimate, libs.versions.ij.platform) {
-            useInstaller = false
-        }
+        intellijIdea(libs.versions.intellij.platform)
+
         pluginModule(implementation(project(":shared")))
         pluginModule(implementation(project(":frontend")))
         pluginModule(implementation(project(":backend")))
@@ -27,9 +47,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            create(IntelliJPlatformType.IntellijIdeaUltimate, libs.versions.ij.platform) {
-                useInstaller = false
-            }
+            create(IntelliJPlatformType.IntellijIdeaUltimate, libs.versions.intellij.platform)
         }
     }
 }
